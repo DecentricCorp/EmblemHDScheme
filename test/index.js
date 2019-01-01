@@ -99,14 +99,6 @@ describe('HD Scheme Suite', ()=>{
             var key = EmblemHD.deriveSpecificChild(RootKey, keyHex, keyIndex)
             expect(key).to.deep.equal(expectedKey.key)
         })
-
-        it('Derives expected key when provided a large index above 200', ()=>{
-            var keyIndex = 201
-            var keyHex = RootKey.privateKey.toString('hex')
-            var expectedKey = EmblemHD.derive(RootKey, 'privateKey', keyIndex + 1)[keyIndex]
-            var key = EmblemHD.deriveSpecificChild(RootKey, keyHex, keyIndex)
-            expect(key).to.deep.equal(expectedKey.key)
-        })
     })
 
     describe('Generate Dat Key', ()=>{
