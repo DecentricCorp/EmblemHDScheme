@@ -3,11 +3,10 @@ const rewire = require('rewire')
 const EmblemHD = rewire('../').__get__('methods')
 
 describe('HD Scheme Suite', ()=>{
-    var RootKey 
+    const RootKey = EmblemHD.generateRootKey()
     var HDKeySignature = [ '_buffers','xprivkey','network','depth','privateKey','publicKey','fingerPrint','_hdPublicKey','hdPublicKey','xpubkey' ]
-    before(function() {
-        RootKey = EmblemHD.generateRootKey()
-      });
+    var ed25519Expected = '{"publicKey":{"type":"Buffer","data":[63,235,10,167,189,58,103,75,73,255,57,37,194,85,36,41,138,200,253,223,63,46,77,31,143,230,2,139,50,237,22,217]},"secretKey":{"type":"Buffer","data":[98,101,102,54,98,51,100,98,56,53,101,51,53,51,48,97,53,52,98,51,97,101,102,52,99,101,55,49,97,99,98,100,63,235,10,167,189,58,103,75,73,255,57,37,194,85,36,41,138,200,253,223,63,46,77,31,143,230,2,139,50,237,22,217]}}'
+    var ed25519Seed = 'bef6b3db85e3530a54b3aef4ce71acbd9f5a70e77cf0c3a4527f8389ac5b9e10'
 
     describe('Derive', ()=>{
         it('returns an empty array when no key is provided', function () {
@@ -61,43 +60,40 @@ describe('HD Scheme Suite', ()=>{
     describe('Derive children', ()=>{
         it('Derives valid HDKeys', ()=>{
             var keyHex = RootKey.privateKey.toString('hex')
-            var keys = EmblemHD.deriveChildren(RootKey, keyHex)
+            var keys = EmblemHD.deriveChildren(RootKey, keyHex, 0, 'privateKey')
             keys.forEach(key => {
                 expect(Object.keys(key.key)).to.deep.equal(HDKeySignature)
             });
         })
     })
+
     describe('Derive specific child', ()=>{
         it('Derives expected key when provided an index of 0', ()=>{
             var keyIndex = 0
-            var keyHex = RootKey.privateKey.toString('hex')
             var expectedKey = EmblemHD.derive(RootKey, 'privateKey', keyIndex + 1)[keyIndex]
-            var key = EmblemHD.deriveSpecificChild(RootKey, keyHex, keyIndex)
-            expect(key).to.deep.equal(expectedKey.key)
+            var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex)
+            expect(key.key).to.deep.equal(expectedKey.key)
         })
 
         it('Derives expected key when provided an index of 1', ()=>{
             var keyIndex = 1
-            var keyHex = RootKey.privateKey.toString('hex')
             var expectedKey = EmblemHD.derive(RootKey, 'privateKey', keyIndex + 1)[keyIndex]
-            var key = EmblemHD.deriveSpecificChild(RootKey, keyHex, keyIndex)
-            expect(key).to.deep.equal(expectedKey.key)
-        })
+            var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex)
+            expect(key.key).to.deep.equal(expectedKey.key)
+        }) 
 
         it('Derives expected key when provided an index greater than 16', ()=>{
             var keyIndex = 22
-            var keyHex = RootKey.privateKey.toString('hex')
             var expectedKey = EmblemHD.derive(RootKey, 'privateKey', keyIndex + 1)[keyIndex]
-            var key = EmblemHD.deriveSpecificChild(RootKey, keyHex, keyIndex)
-            expect(key).to.deep.equal(expectedKey.key)
+            var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex)
+            expect(key.key).to.deep.equal(expectedKey.key)
         })
 
         it('Derives expected key when provided an index less than 16', ()=>{
             var keyIndex = 13
-            var keyHex = RootKey.privateKey.toString('hex')
             var expectedKey = EmblemHD.derive(RootKey, 'privateKey', keyIndex + 1)[keyIndex]
-            var key = EmblemHD.deriveSpecificChild(RootKey, keyHex, keyIndex)
-            expect(key).to.deep.equal(expectedKey.key)
+            var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex)
+            expect(key.key).to.deep.equal(expectedKey.key)
         })
     })
 
@@ -110,10 +106,18 @@ describe('HD Scheme Suite', ()=>{
             expect(keyset1.secretKey.length).to.equal(64)
         })
         it('should generate deterministic keys when provided a known seed', ()=>{
-            var seed = new Buffer('bef6b3db85e3530a54b3aef4ce71acbd9f5a70e77cf0c3a4527f8389ac5b9e10')
+            var seed = new Buffer(ed25519Seed)
             var keyset1 = EmblemHD.generateDatKey(seed)
-            var keyset2 = EmblemHD.generateDatKey(seed)
-            expect(keyset1).to.deep.equal(keyset2)
+            expect(JSON.stringify(keyset1)).to.deep.equal(ed25519Expected)
+        }) 
+    })
+
+    describe('Generate Dat', ()=>{
+        it('creates a valid dat from provided key', ()=>{
+            var keyset1 = EmblemHD.generateDatKey()
+            EmblemHD.generateDat(keyset1.secretKey.toString('hex'), (err, dat)=>{
+                expect(dat.key).to.deep.equal(keyset1.secretKey)
+            })
         })
     })
 })
