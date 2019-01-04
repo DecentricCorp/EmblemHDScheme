@@ -68,32 +68,45 @@ describe('HD Scheme Suite', ()=>{
     })
 
     describe('Derive specific child', ()=>{
-        it('Derives expected key when provided an index of 0', ()=>{
+        it('Derives expected key when provided an index of 0', (/* done */)=>{
             var keyIndex = 0
             var expectedKey = EmblemHD.derive(RootKey, 'privateKey', keyIndex + 1)[keyIndex]
             var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex)
-            expect(key.key).to.deep.equal(expectedKey.key)
+            key.then((key)=>{
+                expect(key.key).to.deep.equal(expectedKey.key)
+            })
+            
+            /* key.dat.then((dat)=>{
+                expect(dat.key.toString('hex')).to.equal(key.datKeys.secretKey.toString('hex'))
+                console.log(dat.key.toString('hex'))
+            }) */
         })
 
         it('Derives expected key when provided an index of 1', ()=>{
             var keyIndex = 1
             var expectedKey = EmblemHD.derive(RootKey, 'privateKey', keyIndex + 1)[keyIndex]
             var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex)
-            expect(key.key).to.deep.equal(expectedKey.key)
+            key.then((key)=>{
+                expect(key.key).to.deep.equal(expectedKey.key)
+            })
         }) 
 
         it('Derives expected key when provided an index greater than 16', ()=>{
             var keyIndex = 22
             var expectedKey = EmblemHD.derive(RootKey, 'privateKey', keyIndex + 1)[keyIndex]
             var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex)
-            expect(key.key).to.deep.equal(expectedKey.key)
+            key.then((key)=>{
+                expect(key.key).to.deep.equal(expectedKey.key)
+            })
         })
 
         it('Derives expected key when provided an index less than 16', ()=>{
             var keyIndex = 13
             var expectedKey = EmblemHD.derive(RootKey, 'privateKey', keyIndex + 1)[keyIndex]
             var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex)
-            expect(key.key).to.deep.equal(expectedKey.key)
+            key.then((key)=>{
+                expect(key.key).to.deep.equal(expectedKey.key)
+            })
         })
     })
 
@@ -109,14 +122,14 @@ describe('HD Scheme Suite', ()=>{
             var seed = new Buffer(ed25519Seed)
             var keyset1 = EmblemHD.generateDatKey(seed)
             expect(JSON.stringify(keyset1)).to.deep.equal(ed25519Expected)
-        }) 
+        })
     })
 
     describe('Generate Dat', ()=>{
         it('creates a valid dat from provided key', ()=>{
             var keyset1 = EmblemHD.generateDatKey()
-            EmblemHD.generateDat(keyset1.secretKey.toString('hex'), (err, dat)=>{
-                expect(dat.key).to.deep.equal(keyset1.secretKey)
+            EmblemHD.generateDat(keyset1.publicKey.toString('hex'), (err, dat)=>{
+                expect(dat.key).to.deep.equal(keyset1.publicKey)
             })
         })
     })

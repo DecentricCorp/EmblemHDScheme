@@ -3,8 +3,18 @@ var crypto = require('hypercore-crypto')
 var hdkey = new new Coval.Coval().Secure.HDKey()
 var ram = require('random-access-memory')
 var Dat = require('dat-node')
+const util = require('util')
 
-var methods = {
+var datMethods = {
+    generateDat: (key, cb)=>{
+        Dat(ram, { key: key, createWithKey: true}, function (err, dat) {
+            return cb(err, dat)
+        })
+    }
+}
+var asyncMethods = {generateDatAsync : util.promisify(datMethods.generateDat)}
+  
+methods = {
     derive: function(rootKey, deriveType, qty) {
         if (!qty) qty = 16
         var maxLevel = Math.ceil(qty/16)
@@ -60,12 +70,13 @@ var methods = {
         var keyHex = key[deriveType].toString('hex')
         if (maxLevel > 0) keyHex = key.derive(derivationPath)[deriveType].toString('hex')
         var paths = this.splitKeysToPaths(this.splitKey(keyHex))
-        //console.log("specific paths", paths)
         var localPath = paths.reverse()[lastSetIndex]
         var path = "m/"+maxLevel.toString()+"'/"+localPath
         var specificKey = key.deriveChild(path)
         var datKey = this.generateDatKey(Buffer(specificKey[deriveType].toString('hex')))
-        return {key: specificKey, path: path, datKeys: {publicKey: datKey.publicKey.toString('hex'), secretKey: datKey.secretKey.toString('hex')}}
+        return this.generateDatAsync(datKey.secretKey).then((dat)=>{
+            return {key: specificKey, path: path, dat:dat , datKeys: {publicKey: datKey.publicKey.toString('hex'), secretKey: datKey.secretKey.toString('hex')}}
+        })
     },
     generateRootKey: function(){
         return hdkey.StandardHDKey('0', function(address, key){
@@ -93,12 +104,10 @@ var methods = {
     generateDatKey: (seed)=>{
         return crypto.keyPair(seed)
     },
-    generateDat: (key, cb)=>{
-        Dat(ram, { key: key, createWithKey: true}, function (err, dat) {
-            return cb(err, dat)
-        })
-    }
+    generateDat: datMethods.generateDat,
+    generateDatAsync : util.promisify(datMethods.generateDat)
 }
+
 
 module.exports = {
     derive: methods.derive,
