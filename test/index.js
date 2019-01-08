@@ -39,7 +39,11 @@ describe('HD Scheme Suite', ()=>{
         })
         it('creates Dat in ram when option is specified', ()=>{
             var keys = EmblemHD.derive(RootKey, 'privateKey', {storage: "ram"})
-            expect(Object.keys(keys[0].key)).to.deep.equal(HDKeySignature)
+            var dat = keys[0].dat
+            dat.then(dat=>{
+                expect(Object.keys(dat)).to.deep.equal(RamDATSignature)
+            })
+            
         })
     })
 
