@@ -10,8 +10,10 @@ var fs = require('fs-extra')
 var datMethods = {
     generateDat: (index, key, opts, cb)=>{
         var rnd = Math.random().toString().split('.')[1]
-        var src = path.join(__dirname, 'dats', rnd)        
-        Dat(/* ram */ src, { key: key, createWithKey: true}, function (err, dat) {
+        var src = path.join(__dirname, 'dats', rnd)
+        var storage = src
+        if (opts && opts.storage && opts.storage === "ram") storage = ram
+        Dat(storage, { key: key, createWithKey: true}, function (err, dat) {
             return cb(err, dat)
         })
     }
