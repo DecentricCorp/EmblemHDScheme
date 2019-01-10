@@ -1,3 +1,5 @@
+<img src="./media/Emblem.DAT.Shard.Network.png"/>
+
 ```
 HD Scheme Suite
     Derive
