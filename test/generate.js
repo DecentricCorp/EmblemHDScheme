@@ -3,6 +3,7 @@ const rewire = require('rewire')
 var path = require('path')
 var fs = require('fs-extra')
 const EmblemHD = rewire('../').__get__('methods')
+var sha256 = require('js-sha256').sha256
 
 describe('HD Scheme Suite', ()=>{
     const RootKey = EmblemHD.generateRootKey()
@@ -11,6 +12,8 @@ describe('HD Scheme Suite', ()=>{
     var RamDATSignature = ["archive","options","key","live","resumed","writable","version"]
     var ed25519Expected = '{"publicKey":{"type":"Buffer","data":[63,235,10,167,189,58,103,75,73,255,57,37,194,85,36,41,138,200,253,223,63,46,77,31,143,230,2,139,50,237,22,217]},"secretKey":{"type":"Buffer","data":[98,101,102,54,98,51,100,98,56,53,101,51,53,51,48,97,53,52,98,51,97,101,102,52,99,101,55,49,97,99,98,100,63,235,10,167,189,58,103,75,73,255,57,37,194,85,36,41,138,200,253,223,63,46,77,31,143,230,2,139,50,237,22,217]}}'
     var ed25519Seed = 'bef6b3db85e3530a54b3aef4ce71acbd9f5a70e77cf0c3a4527f8389ac5b9e10'
+    var ed25519Key = '3feb0aa7bd3a674b49ff3925c25524298ac8fddf3f2e4d1f8fe6028b32ed16d9'
+    var ed25519DiscoveryKey = '3feeff20ae5ad5b93890bc77e78901e0d06c29c8aca34609c094ccc726ae865b'
     before(()=>{
         var src = path.join(__dirname, '..', 'dats')
         fs.ensureDirSync(src)
@@ -155,26 +158,29 @@ describe('HD Scheme Suite', ()=>{
         it('should generate deterministic keys when provided a known seed', ()=>{
             var seed = new Buffer(ed25519Seed)
             var keyset1 = EmblemHD.generateDatKey(seed)
-            expect(JSON.stringify(keyset1)).to.deep.equal(ed25519Expected)
+            expect(keyset1.publicKey.toString('hex')).to.equal(ed25519Key)
         })
     })
 
     describe('Generate Dat', ()=>{
-        it('creates a valid dat from provided key', ()=>{
-            var keyset1 = EmblemHD.generateDatKey()
-            EmblemHD.generateDat(0, keyset1.publicKey.toString('hex'), {}, (err, dat)=>{
-                expect(dat.key).to.deep.equal(keyset1.publicKey)
+        it('creates a valid dat from provided key', (done)=>{
+            var seed = new Buffer(ed25519Seed)
+            var keyset1 = EmblemHD.generateDatKey(seed)
+            keyset1.seed = seed
+            EmblemHD.generateDat(0, keyset1.secretKey, {storage: "ram"}, (err, dat1)=>{  
+                expect(dat1.key.toString('hex')).to.equal(ed25519Key)
+                expect(dat1.archive.discoveryKey.toString('hex')).to.equal(ed25519DiscoveryKey)
+                done()
             })
         })
         it('generates 16 Dat objects when no qty is provided',(done)=>{
-            var keys = EmblemHD.derive(RootKey, 'privateKey')
+            var keys = EmblemHD.derive(RootKey, 'privateKey', {storage: "ram"})
             
             var checkDatKey = (index)=>{
                 var key = keys[index]
                 var datKeys = key.datKeys
-                
                 key.dat.then(dat=>{
-                    expect(dat.key.toString('hex')).to.equal(datKeys.secretKey)
+                    expect(dat.key.toString('hex')).to.equal(datKeys.publicKey)
                     if (index+1 === keys.length) {
                         done()
                     } else {

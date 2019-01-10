@@ -6,14 +6,16 @@ var Dat = require('dat-node')
 const util = require('util')
 var path = require('path')
 var fs = require('fs-extra')
-
+var sha256 = require('js-sha256').sha256;
 var datMethods = {
     generateDat: (index, key, opts, cb)=>{
         var rnd = Math.random().toString().split('.')[1]
         var src = path.join(__dirname, 'dats', rnd)
         var storage = src
+        //console.log(key.toString('hex'))
         if (opts && opts.storage && opts.storage === "ram") storage = ram
-        Dat(storage, { key: key, createWithKey: true}, function (err, dat) {
+        Dat(storage, { secretKey: key, createWithKey: true }, function (err, dat) {
+            //console.log(dat.key.toString('hex'))
             return cb(err, dat)
         })
     }
@@ -30,7 +32,7 @@ methods = {
         var baseRootKey = rootKey
         var keyHex = baseRootKey[deriveType].toString('hex')
         for (let index = 0; index < maxLevel; index++) {
-            var currentChildren = this.deriveChildren(baseRootKey, keyHex, index, deriveType, opts)
+            var currentChildren = methods.deriveChildren(baseRootKey, keyHex, index, deriveType, opts)
             children = children.concat(currentChildren)
             if (children.length === opts.qty) {
                 return children
@@ -48,13 +50,13 @@ methods = {
         if (!level) level = 0
         var keyIndex = 0
         var keys = []
-        var paths = this.splitKeysToPaths(this.splitKey(keyHex))
+        var paths = methods.splitKeysToPaths(methods.splitKey(keyHex))
         var currentKey = key
         var deriveChild = ()=>{
             var localPath = paths.pop()
             var path = "m/"+level.toString()+"'/"+localPath
             currentKey = key.deriveChild(path)
-            var datKey = this.generateDatKey(Buffer(currentKey[deriveType].toString('hex')))
+            var datKey = methods.generateDatKey(Buffer(currentKey[deriveType].toString('hex')))
             var keyObject = {key: currentKey, dat: this.generateDatAsync(keyIndex, datKey.secretKey, opts), path: path, datKeys: {publicKey: datKey.publicKey.toString('hex'), secretKey: datKey.secretKey.toString('hex')}}
             keys.push(keyObject)
             keyIndex = keyIndex + 1
@@ -72,11 +74,11 @@ methods = {
         var derivationPath =  "m/"+maxLevel.toString()
         var keyHex = key[deriveType].toString('hex')
         if (maxLevel > 0) keyHex = key.derive(derivationPath)[deriveType].toString('hex')
-        var paths = this.splitKeysToPaths(this.splitKey(keyHex))
+        var paths = methods.splitKeysToPaths(methods.splitKey(keyHex))
         var localPath = paths.reverse()[lastSetIndex]
         var path = "m/"+maxLevel.toString()+"'/"+localPath
         var specificKey = key.deriveChild(path)
-        var datKey = this.generateDatKey(Buffer(specificKey[deriveType].toString('hex')))
+        var datKey = methods.generateDatKey(Buffer(sha256(specificKey[deriveType].toString('hex'))))
         return this.generateDatAsync(keyIndex, datKey.secretKey, opts).then((dat)=>{
             return {key: specificKey, path: path, dat:dat , datKeys: {publicKey: datKey.publicKey.toString('hex'), secretKey: datKey.secretKey.toString('hex')}}
         })
@@ -105,7 +107,12 @@ methods = {
         return keyToPath()  
     },
     generateDatKey: (seed)=>{
-        return crypto.keyPair(seed)
+        var keyPair = {seed: seed}
+        var calculatedKeypair = crypto.keyPair(seed)
+        keyPair.secretKey = calculatedKeypair.secretKey
+        keyPair.publicKey = calculatedKeypair.publicKey
+        keyPair.discoveryKey = crypto.discoveryKey(calculatedKeypair.secretKey)
+        return keyPair 
     },
     generateDat: datMethods.generateDat,
     generateDatAsync : util.promisify(datMethods.generateDat),
