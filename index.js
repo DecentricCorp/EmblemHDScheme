@@ -143,5 +143,6 @@ methods.deriveAsync = util.promisify(methods.derivePromises)
 module.exports = {
     derive: methods.derive,
     deriveAsync: methods.deriveAsync,
-    generateRootKey: methods.generateRootKey
+    generateRootKey: methods.generateRootKey,
+    generateDatKey: methods.generateDatKey
 }
