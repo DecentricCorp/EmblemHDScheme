@@ -1,5 +1,5 @@
 {
-  "name": "emblemhdscheme",
+  "name": "emblemdatstorage",
   "version": "1.0.0",
   "description": "Scheme to deterministically derive keys in a hard to reverse way",
   "main": "index.js",

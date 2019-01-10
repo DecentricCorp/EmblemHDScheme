@@ -29,15 +29,15 @@ describe('HD Scheme Suite', ()=>{
             expect(keys).to.be.an('array')
         })
         it('returns an array of 16 items when provided a valid key', ()=>{
-            var keys = EmblemHD.derive(RootKey, 'privateKey')
+            var keys = EmblemHD.derive(RootKey, 'privateKey', {storage: 'ram'})
             expect(keys).to.have.lengthOf(16);
         })
         it('returns an array of 17 items when provided a valid key and a qty of 17', ()=>{
-            var keys = EmblemHD.derive(RootKey, 'privateKey', {qty: 17})
+            var keys = EmblemHD.derive(RootKey, 'privateKey', {qty: 17, storage: 'ram'})
             expect(keys).to.have.lengthOf(17);
         })
         it('returns valid keys', ()=>{
-            var keys = EmblemHD.derive(RootKey, 'privateKey')
+            var keys = EmblemHD.derive(RootKey, 'privateKey', {storage: 'ram'})
             expect(Object.keys(keys[0].key)).to.deep.equal(HDKeySignature)
         })
         it('creates Dat in ram when option is specified', ()=>{
@@ -100,7 +100,7 @@ describe('HD Scheme Suite', ()=>{
     describe('Derive children', ()=>{
         it('Derives valid HDKeys', ()=>{
             var keyHex = RootKey.privateKey.toString('hex')
-            var keys = EmblemHD.deriveChildren(RootKey, keyHex, 0, 'privateKey')
+            var keys = EmblemHD.deriveChildren(RootKey, keyHex, 0, 'privateKey', {storage: 'ram'})
                 keys.forEach(key => {
                     expect(Object.keys(key.key)).to.deep.equal(HDKeySignature)
                 })
@@ -110,9 +110,9 @@ describe('HD Scheme Suite', ()=>{
     describe('Derive specific child', ()=>{
         it('Derives expected key when provided an index of 0', (done)=>{
             var keyIndex = 0
-            var keys= EmblemHD.derive(RootKey, 'privateKey', {qty: keyIndex + 1})
+            var keys= EmblemHD.derive(RootKey, 'privateKey', {storage: 'ram', qty: keyIndex + 1})
                 var expectedKey = keys[keyIndex]
-                var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex)
+                var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex, {storage: 'ram'})
                 key.then((key)=>{
                     expect(key.key).to.deep.equal(expectedKey.key)
                     done()
@@ -121,8 +121,8 @@ describe('HD Scheme Suite', ()=>{
 
         it('Derives expected key when provided an index of 1', ()=>{
             var keyIndex = 1
-            var expectedKey = EmblemHD.derive(RootKey, 'privateKey', {qty: keyIndex + 1})[keyIndex]
-            var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex)
+            var expectedKey = EmblemHD.derive(RootKey, 'privateKey', {storage: 'ram', qty: keyIndex + 1})[keyIndex]
+            var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex, {storage: 'ram'})
             key.then((key)=>{
                 expect(key.key).to.deep.equal(expectedKey.key)
             })
@@ -130,8 +130,8 @@ describe('HD Scheme Suite', ()=>{
 
         it('Derives expected key when provided an index greater than 16', ()=>{
             var keyIndex = 22
-            var expectedKey = EmblemHD.derive(RootKey, 'privateKey', {qty: keyIndex + 1})[keyIndex]
-            var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex)
+            var expectedKey = EmblemHD.derive(RootKey, 'privateKey', {storage: 'ram', qty: keyIndex + 1})[keyIndex]
+            var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex, {storage: 'ram'})
             key.then((key)=>{
                 expect(key.key).to.deep.equal(expectedKey.key)
             })
@@ -139,8 +139,8 @@ describe('HD Scheme Suite', ()=>{
 
         it('Derives expected key when provided an index less than 16', ()=>{
             var keyIndex = 13
-            var expectedKey = EmblemHD.derive(RootKey, 'privateKey', {qty: keyIndex + 1})[keyIndex]
-            var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex)
+            var expectedKey = EmblemHD.derive(RootKey, 'privateKey', {storage: 'ram', qty: keyIndex + 1})[keyIndex]
+            var key = EmblemHD.deriveSpecificChild(RootKey, 'privateKey', keyIndex, {storage: 'ram'})
             key.then((key)=>{
                 expect(key.key).to.deep.equal(expectedKey.key)
             })
