@@ -142,6 +142,17 @@ methods = {
             })
         }
         checkDatKey(keys, 0)
+    },
+    derivePathedDatKey(rootKey, keyType, level, index){
+        if (!index) index = 0
+        if (!level) level = 0
+        var keyHex = rootKey[keyType].toString('hex')
+        var splits = methods.splitKey(keyHex)
+        var paths = methods.splitKeysToPaths(splits)
+        var path = "m/"+level+"'/"+paths.reverse()[index]
+        var currentKey = rootKey.deriveChild(path)
+        var keys = methods.generateDatKey(new Buffer(currentKey[keyType].toString('hex')))
+        return keys
     }
 }
 methods.deriveAsync = util.promisify(methods.derivePromises)
@@ -184,7 +195,7 @@ var storageMethods = {
                 })
                 
                 importProgress.on('end', (src, dest)=>{
-                    shadowStream.write(JSON.stringify(shadowObject))
+                    shadowStream.write(JSON.stringify(shadowObject, null, 4))
                     shadowStream.end()
                 })
                 shadowStream.on('finish', function () {
@@ -202,10 +213,13 @@ storageMethods.storeShadowedAsync = util.promisify(storageMethods.storeShadowed)
 module.exports = {
     derive: methods.derive,
     deriveAsync: methods.deriveAsync,
+    derivePathedDatKey: methods.derivePathedDatKey,
     generateRootKey: methods.generateRootKey,
     generateDatKey: methods.generateDatKey,
     storeShadowed: storageMethods.storeShadowed,
-    storeShadowedAsync: storageMethods.storeShadowedAsync
+    storeShadowedAsync: storageMethods.storeShadowedAsync,
+    splitKey: methods.splitKey,
+    splitKeysToPaths: methods.splitKeysToPaths
     
 }
 

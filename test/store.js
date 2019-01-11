@@ -188,6 +188,25 @@ describe('Dat storage', ()=>{
         })
     })
 
+    it('should be able to reconstruct the metadata from a publicKey', (done)=>{
+        var secretDatKeys = EmblemHD.derivePathedDatKey(RootKey, 'privateKey')
+        var shadowDatKeys = EmblemHD.derivePathedDatKey(RootKey, 'publicKey')
+        
+        var src = path.join(__dirname, '..', 'multifileImports')
+        var storeDatsPromise = EmblemHD.storeShadowedAsync(RootKey, {src: src})
+        storeDatsPromise.then((dats)=>{
+            dats.shadowCollection.then(shadowCollection=>{
+                var dat = shadowCollection[0].dat
+                expect(shadowDatKeys.publicKey.toString('hex')).to.equal(dat.key.toString('hex'))
+                    dats.secretCollection.then(secretCollection=>{
+                    var secretDat = secretCollection[0].dat
+                    expect(secretDatKeys.publicKey.toString('hex')).to.equal(secretDat.key.toString('hex'))
+                    done()
+                })
+            })            
+        })
+    })
+
     function decrypt (text, key) {
         try {
           let textParts = text.split(':')

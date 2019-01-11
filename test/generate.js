@@ -94,6 +94,7 @@ describe('HD Scheme Suite', ()=>{
             var key1 = RootKey.privateKey.toString('hex')
             var privSplits = EmblemHD.splitKey(key1)
             var paths = EmblemHD.splitKeysToPaths(privSplits)
+            expect(paths).to.have.lengthOf(16)
         })
     })
 
