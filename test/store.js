@@ -28,7 +28,7 @@ describe('Dat storage', ()=>{
         fs.ensureDirSync(src)
     })
 
-    /* it('stores data in single dat', (done)=>{
+    it('stores data in single dat', (done)=>{
         var keys = EmblemHD.deriveAsync(RootKey, 'privateKey', {qty: 1, storage: "ram", "import":true})
         keys.then(key=>{
             var src = path.join(__dirname, '..', 'imports')
@@ -152,7 +152,7 @@ describe('Dat storage', ()=>{
                 })
             })            
         })
-    }) */
+    })
 
     it('should encrypt secret collection content', (done)=>{
         var src = path.join(__dirname, '..', 'imports')
