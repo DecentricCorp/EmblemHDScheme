@@ -9,6 +9,7 @@ var fs = require('fs-extra')
 var sha256 = require('js-sha256').sha256
 const zlib = require('zlib')
 const encryption = require('crypto')
+var stream = require('stream')
 
 var datMethods = {
     generateDat: (index, key, opts, cb)=>{
@@ -149,27 +150,39 @@ var storageMethods = {
     storeShadowed: function(rootKey, opts, cb){
         var secretCollection = methods.deriveAsync(rootKey, 'privateKey', {qty: 1, storage: "ram", "import":true})
         var shadowCollection = methods.deriveAsync(rootKey, 'publicKey', {qty: 1, storage: "ram", "import":true})
+        var encryptionKey = rootKey.privateKey.toBuffer()
         secretCollection.then(secretContainer=>{
             var secretDat = secretContainer[0].dat
             shadowCollection.then(shadowContainer=>{
-                // Should create read stream
-                // zip
-                // encrypt
-                // rename
-                // loop / finish
-                // https://gist.github.com/bbstilson/2c4241f8e89e6af4539cd2f347a28a17#file-encrypt-js
-                // https://gist.github.com/bbstilson/a3a6c74fdc2a2519ab6ba59bcd06a1c4#file-decrypt-js
                 var importProgress = secretDat.importFiles(opts.src)
                 var shadowDat = shadowContainer[0].dat
                 var shadowStream = shadowDat.archive.createWriteStream('shadow.json')
                 var shadowObject = {files: []}
                 importProgress.on('put', (src, dest)=>{
+                    var fileHash = sha256(src.fs.readFileSync(src.name))
+                    var realCreateReadStream = src.fs.createReadStream
+                    var createEncryptedReadStream = function(name){                        
+                        var content = src.fs.readFileSync(name)
+                        var encrypted = encrypt(content, encryptionKey)
+                        var bufferStream = new stream.PassThrough()
+                        bufferStream.end(new Buffer(encrypted))
+                        return bufferStream
+                    }
+                    src.fs.createReadStream = createEncryptedReadStream
+                    var origName = dest.name
+                    var newName = origName.split('/')
+                    newName[newName.length -1] = fileHash + '.enc'
+                    dest.name = newName.join('/')
                     shadowObject.files.push({
-                        name: dest.name, 
+                        name: origName, 
                         stats: src.stat,
-                        hash: sha256(src.fs.readFileSync(src.name))
+                        hash: fileHash
                     })
                 })
+                importProgress.on('put-data', (chunk, src, dest)=>{
+                    //console.log(chunk)
+                })
+                
                 importProgress.on('end', (src, dest)=>{
                     shadowStream.write(JSON.stringify(shadowObject))
                     shadowStream.end()
@@ -195,3 +208,20 @@ module.exports = {
     storeShadowedAsync: storageMethods.storeShadowedAsync
     
 }
+
+function encrypt (text, key) {
+    try {
+      const IV_LENGTH = 16 // For AES, this is always 16
+      let iv = encryption.randomBytes(IV_LENGTH)
+      let cipher = encryption.createCipheriv('aes-256-cbc', key, iv)
+      let encrypted = cipher.update(text)
+  
+      encrypted = Buffer.concat([encrypted, cipher.final()])
+  
+      return iv.toString('hex') + ':' + encrypted.toString('hex')
+    } catch (err) {
+      throw err
+    }
+  }
+  
+
