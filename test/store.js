@@ -7,6 +7,8 @@ var http = require('http')
 var crypto = require('crypto')
 var stream = require('stream')
 const zlib = require('zlib')
+var server = require('./server')
+var request = require('request')
 
 const HASHMock = {
     'fileContentHashs': {
@@ -79,6 +81,7 @@ describe('Dat storage', ()=>{
             done()
         })
     })
+
     it('should be able to read metadata from shadowed collection of one file', (done)=>{
         var src = path.join(__dirname, '..', 'imports')
         var storeDatsPromise = EmblemHD.storeShadowedAsync(RootKey, {src: src})
@@ -96,6 +99,7 @@ describe('Dat storage', ()=>{
             })            
         })
     })
+
     it('should be able to read metadata from shadowed collection of multiple files', (done)=>{
         var src = path.join(__dirname, '..', 'multifileImports')
         var storeDatsPromise = EmblemHD.storeShadowedAsync(RootKey, {src: src})
@@ -115,6 +119,7 @@ describe('Dat storage', ()=>{
             
         })
     })
+
     it('should be able to read metadata from shadowed collection of multiple and nested files', (done)=>{
         var src = path.join(__dirname, '..', 'multifileNestedImports')
         var storeDatsPromise = EmblemHD.storeShadowedAsync(RootKey, {src: src})
@@ -206,20 +211,22 @@ describe('Dat storage', ()=>{
             })            
         })
     })
-
-    function decrypt (text, key) {
-        try {
-          let textParts = text.split(':')
-          let iv = Buffer.from(textParts.shift(), 'hex')
-          let encryptedText = Buffer.from(textParts.join(':'), 'hex')
-          let decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
-          let decrypted = decipher.update(encryptedText)
-      
-          decrypted = Buffer.concat([decrypted, decipher.final()])
-      
-          return decrypted.toString()
-        } catch (err) {
-          throw err
-        }
-      }
 })
+
+
+
+function decrypt (text, key) {
+    try {
+      let textParts = text.split(':')
+      let iv = Buffer.from(textParts.shift(), 'hex')
+      let encryptedText = Buffer.from(textParts.join(':'), 'hex')
+      let decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
+      let decrypted = decipher.update(encryptedText)
+  
+      decrypted = Buffer.concat([decrypted, decipher.final()])
+  
+      return decrypted.toString()
+    } catch (err) {
+      throw err
+    }
+  }

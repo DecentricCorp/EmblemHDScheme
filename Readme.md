@@ -4,12 +4,12 @@
 HD Scheme Suite
     Derive
       ✓ returns an empty array when no key is provided
-      ✓ returns an array of 16 items when provided a valid key (105ms)
-      ✓ returns an array of 17 items when provided a valid key and a qty of 17 (142ms)
-      ✓ returns valid keys (62ms)
-      ✓ creates Dat in ram when option is specified (73ms)
+      ✓ returns an array of 16 items when provided a valid key (106ms)
+      ✓ returns an array of 17 items when provided a valid key and a qty of 17 (132ms)
+      ✓ returns valid keys (65ms)
+      ✓ creates Dat in ram when option is specified (69ms)
     Derive Async
-      ✓ resolves all promises (164ms)
+      ✓ resolves all promises (200ms)
     Generate Root HD Key
       ✓ generates a unique key each time
     Split key
@@ -17,31 +17,35 @@ HD Scheme Suite
     Split Keys To Paths
       ✓ returns array of integer paths
     Derive children
-      ✓ Derives valid HDKeys (75ms)
+      ✓ Derives valid HDKeys (82ms)
     Derive specific child
-      ✓ Derives expected key when provided an index of 0 (180ms)
-      ✓ Derives expected key when provided an index of 1 (77ms)
-      ✓ Derives expected key when provided an index greater than 16 (130ms)
-      ✓ Derives expected key when provided an index less than 16 (64ms)
+      ✓ Derives expected key when provided an index of 0 (185ms)
+      ✓ Derives expected key when provided an index of 1 (76ms)
+      ✓ Derives expected key when provided an index greater than 16 (140ms)
+      ✓ Derives expected key when provided an index less than 16 (65ms)
     Generate Dat Key
       ✓ should generate a random ed25519 keypairs
       ✓ should generate deterministic keys when provided a known seed
     Generate Dat
       ✓ creates a valid dat from provided key
-      ✓ generates 16 Dat objects when no qty is provided (166ms)
+      ✓ generates 16 Dat objects when no qty is provided (195ms)
+
+  Emblem Dat server
+    ✓ processes single file upload (6447ms)
+    ✓ processes multi file upload (10771ms)
+    ✓ processes nested multi file upload (22146ms)
 
   Dat storage
-    ✓ stores data in single dat (191ms)
-    ✓ dat is servable over http (228ms)
-    ✓ should return secret and shadowed collection when passed folder path (275ms)
-    ✓ should be able to read metadata from shadowed collection of one file (386ms)
-    ✓ should be able to read metadata from shadowed collection of multiple files (351ms)
-    ✓ should be able to read metadata from shadowed collection of multiple and nested files (402ms)
-    ✓ should hash file content into shadow metadata (379ms)
+    ✓ stores data in single dat (187ms)
+    ✓ dat is servable over http (234ms)
+    ✓ should return secret and shadowed collection when passed folder path (406ms)
+    ✓ should be able to read metadata from shadowed collection of one file (409ms)
+    ✓ should be able to read metadata from shadowed collection of multiple files (446ms)
+    ✓ should be able to read metadata from shadowed collection of multiple and nested files (359ms)
+    ✓ should hash file content into shadow metadata (413ms)
     ✓ should encrypt secret collection content (404ms)
-    ✓ secret collection content should be decryptable (357ms)
-    ✓ should be able to reconstruct the metadata from a publicKey (397ms)
-
-
-  28 passing (6s)
+    ✓ secret collection content should be decryptable (486ms)
+    ✓ should be able to reconstruct the metadata from a publicKey (395ms)
+    
+   31 passing (9s)
 ```
