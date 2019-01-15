@@ -10,7 +10,9 @@
   "license": "MIT",
   "devDependencies": {
     "body-parser": "^1.18.3",
+    "btoa": "^1.2.1",
     "chai": "^4.2.0",
+    "cryptiles": "^4.1.3",
     "express": "^4.16.4",
     "express-fileupload": "^1.1.1-alpha.1",
     "mime": "^2.4.0",
