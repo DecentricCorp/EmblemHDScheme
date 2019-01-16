@@ -1,0 +1,29 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: 2017-06-15T15:43:31Z
+    name: emblemhd
+    namespace: default
+    resourceVersion: "6844"
+    selfLink: /api/v1/namespaces/default/services/emblemhd
+    uid: 626208ee-51e1-11e7-8167-42010a800254
+  spec:
+    ports:
+    - name: "80"
+      nodePort: 31339
+      port: 80
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      io.kompose.service: emblemhd
+    sessionAffinity: None
+    type: LoadBalancer
+  status:
+    loadBalancer:
+      ingress:
+kind: List
+metadata: {}
+resourceVersion: ""
+selfLink: ""
