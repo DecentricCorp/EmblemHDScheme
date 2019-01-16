@@ -198,6 +198,11 @@ var storageMethods = {
                 })
                 
                 importProgress.on('end', (src, dest)=>{
+                    if (opts.deleteAfterImport) {
+                        fs.remove(opts.src, err=>{
+                            
+                        })
+                    }
                     shadowStream.write(JSON.stringify(shadowObject, null, 4))
                     shadowStream.end()
                 })
