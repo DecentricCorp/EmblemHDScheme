@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha test",
     "serve": "node server.js",
-    "archiver": "cd archivist; node index.js"
+    "archiver": "cd archivist; node index.js",
+    "postinstall": "git clone https://github.com/DecentricCorp/archivist.git; cd archivist; npm install"
   },
   "author": "",
   "license": "MIT",
