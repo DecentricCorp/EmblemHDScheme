@@ -15,6 +15,12 @@
             "name": "Archivist",
             "cwd": "${workspaceFolder}/archivist/",
             "program": "${workspaceFolder}/archivist/index.js"
+        },{
+            "type": "node",
+            "request": "launch",
+            "name": "Archivist Bin",
+            "cwd": "${workspaceFolder}/",
+            "program": "/usr/local/bin/archivist"
         },
         {
             "type": "node",
