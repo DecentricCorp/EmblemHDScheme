@@ -1,14 +1,11 @@
 const expect = require('chai').expect
 var path = require('path')
 var fs = require('fs-extra')
-const EmblemHD = require('../')
+var EmblemHDModule = require('../')
+var EmblemHD = new EmblemHDModule().publicMethods
 const RootKey = EmblemHD.generateRootKey()
 var http = require('http')
 var crypto = require('crypto')
-var stream = require('stream')
-const zlib = require('zlib')
-var server = require('./server')
-var request = require('request')
 
 const HASHMock = {
     'fileContentHashs': {
@@ -31,39 +28,41 @@ describe('Dat storage', ()=>{
     })
 
     it('stores data in single dat', (done)=>{
-        var keys = EmblemHD.deriveAsync(RootKey, 'privateKey', {qty: 1, storage: "ram", "import":true})
-        keys.then(key=>{
             var src = path.join(__dirname, '..', 'imports')
-            var dat = key[0].dat
-            dat.importFiles(src, function () {
-                var archive = dat.archive
-                archive.readFile('/file1.txt', function (err, content) {
-                    expect(content.toString()).to.equal("value1")
-                    dat.close()
-                    done()
+            var storeDatsPromise = EmblemHD.storeShadowedAsync(RootKey, {src: src})
+            storeDatsPromise.then((dats)=>{
+                dats.secretCollection.then(secretCollection=>{
+                    var dat = secretCollection[0].dat
+                    var archive = dat.archive
+                    archive.readFile(HASHMock.fileContentHashs.file1 + '.enc', function (err, content) {
+                        var decryptedContent = decrypt(content.toString(), RootKey.privateKey.toBuffer())
+                        expect(decryptedContent).to.equal("value1")
+                        dat.close()
+                        done()
+                    })
                 })
             })
-        })
     })
 
     it('dat is servable over http', (done)=>{
-        var keys = EmblemHD.deriveAsync(RootKey, 'privateKey', {qty: 1, storage: "ram", "import":true})
-        keys.then(key=>{
-            var src = path.join(__dirname, '..', 'imports')
-            var dat = key[0].dat
-            dat.importFiles(src, function () {                
-                dat.serveHttp()      
+        var src = path.join(__dirname, '..', 'multifileNestedImports')
+        var storeDatsPromise = EmblemHD.storeShadowedAsync(RootKey, {src: src})
+        storeDatsPromise.then((dats)=>{
+            dats.shadowCollection.then(shadowCollection=>{
+                var dat = shadowCollection[0].dat
+                dat.serveHttp()
                 http.get({
                     host: 'localhost',
                     port: 8080,
-                    path: '/file1.txt'
+                    path: '/shadow.json'
                 }, (response)=>{
                     var body = '';
                     response.on('data', function(d) {
                         body += d;
                     });
                     response.on('end', function() {
-                        expect(body).to.equal("value1")
+                        var parsedBody = JSON.parse(body)
+                        expect(parsedBody.files.length).to.equal(4)
                         dat.close()
                         done()
                     })

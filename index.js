@@ -1,6 +1,6 @@
 var Coval = require('coval.js')
 var crypto = require('hypercore-crypto')
-var hdkey = new new Coval.Coval().Secure.HDKey()
+var Hdkey = new Coval.Coval().Secure.HDKey
 var ram = require('random-access-memory')
 var Dat = require('dat-node')
 const util = require('util')
@@ -22,7 +22,7 @@ var datMethods = {
         } else {
             storage = src
         }
-        Dat(storage, { secretKey: key, createWithKey: true }, function (err, dat) {
+        new Dat(storage, { secretKey: key, createWithKey: true }, function (err, dat) {
             return cb(err, dat)
         })
     }
@@ -91,6 +91,7 @@ methods = {
         })
     },
     generateRootKey: function(){
+        var hdkey = new Hdkey()
         return hdkey.StandardHDKey('0', function(address, key){
             return key
         })
@@ -161,6 +162,7 @@ var storageMethods = {
     storeShadowed: function(rootKey, opts, cb){
         var secretCollection = methods.deriveAsync(rootKey, 'privateKey', {qty: 1, storage: "ram", "import":true})
         var shadowCollection = methods.deriveAsync(rootKey, 'publicKey', {qty: 1, storage: "ram", "import":true})
+        var rootSrc, realCreateReadStream
         var encryptionKey = rootKey.privateKey.toBuffer()
         secretCollection.then(secretContainer=>{
             var secretDat = secretContainer[0].dat
@@ -170,8 +172,9 @@ var storageMethods = {
                 var shadowStream = shadowDat.archive.createWriteStream('shadow.json')
                 var shadowObject = {files: []}
                 importProgress.on('put', (src, dest)=>{
+                    rootSrc = src
                     var fileHash = sha256(src.fs.readFileSync(src.name))
-                    var realCreateReadStream = src.fs.createReadStream
+                    realCreateReadStream = src.fs.createReadStream
                     var createEncryptedReadStream = function(name){                        
                         var content = src.fs.readFileSync(name)
                         var encrypted = encrypt(content, encryptionKey)
@@ -199,6 +202,7 @@ var storageMethods = {
                     shadowStream.end()
                 })
                 shadowStream.on('finish', function () {
+                    rootSrc.fs.createReadStream = realCreateReadStream
                     return cb(null, {
                         secretCollection:secretCollection, 
                         shadowCollection:shadowCollection 
@@ -210,18 +214,22 @@ var storageMethods = {
 }
 storageMethods.storeShadowedAsync = util.promisify(storageMethods.storeShadowed)
 
-module.exports = {
-    derive: methods.derive,
-    deriveAsync: methods.deriveAsync,
-    derivePathedDatKey: methods.derivePathedDatKey,
-    generateRootKey: methods.generateRootKey,
-    generateDatKey: methods.generateDatKey,
-    storeShadowed: storageMethods.storeShadowed,
-    storeShadowedAsync: storageMethods.storeShadowedAsync,
-    splitKey: methods.splitKey,
-    splitKeysToPaths: methods.splitKeysToPaths
-    
+function init(){
+    this.publicMethods =  {
+        derive: methods.derive,
+        deriveAsync: methods.deriveAsync,
+        derivePathedDatKey: methods.derivePathedDatKey,
+        generateRootKey: methods.generateRootKey,
+        generateDatKey: methods.generateDatKey,
+        storeShadowed: storageMethods.storeShadowed,
+        storeShadowedAsync: storageMethods.storeShadowedAsync,
+        splitKey: methods.splitKey,
+        splitKeysToPaths: methods.splitKeysToPaths    
+    }
+    return this
 }
+
+module.exports = init
 
 function encrypt (text, key) {
     try {
