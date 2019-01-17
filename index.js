@@ -164,7 +164,7 @@ var storageMethods = {
         var shadowCollection = methods.deriveAsync(rootKey, 'publicKey', {qty: 1, storage: "ram", "import":true})
         var rootSrc, realCreateReadStream
         var encryptionKey = rootKey.privateKey.toBuffer()
-        secretCollection.then(secretContainer=>{
+        secretCollection.then(secretContainer=>{ 
             var secretDat = secretContainer[0].dat
             shadowCollection.then(shadowContainer=>{
                 var importProgress = secretDat.importFiles(opts.src)
@@ -174,7 +174,9 @@ var storageMethods = {
                 importProgress.on('put', (src, dest)=>{
                     rootSrc = src
                     var fileHash = sha256(src.fs.readFileSync(src.name))
-                    realCreateReadStream = src.fs.createReadStream
+                    if (src.fs.createReadStream.name !== "createEncryptedReadStream") {
+                        realCreateReadStream = src.fs.createReadStream
+                    }
                     var createEncryptedReadStream = function(name){                        
                         var content = src.fs.readFileSync(name)
                         var encrypted = encrypt(content, encryptionKey)
@@ -200,7 +202,7 @@ var storageMethods = {
                 importProgress.on('end', (src, dest)=>{
                     if (opts.deleteAfterImport) {
                         fs.remove(opts.src, err=>{
-                            
+                            rootSrc.fs.createReadStream = realCreateReadStream
                         })
                     }
                     shadowStream.write(JSON.stringify(shadowObject, null, 4))
@@ -212,9 +214,9 @@ var storageMethods = {
                         secretCollection:secretCollection, 
                         shadowCollection:shadowCollection 
                     })
-                })             
+                })
             })
-        })
+        }) 
     }
 }
 storageMethods.storeShadowedAsync = util.promisify(storageMethods.storeShadowed)

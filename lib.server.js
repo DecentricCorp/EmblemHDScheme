@@ -7,6 +7,7 @@ var EmblemHD = new EmblemHDModule().publicMethods
 var app = express()
 var PubNub = require('pubnub')
 var pubnub, pubnubOptions
+var path = require('path')
 var init = function (opts, cb) {
     initPubNub(opts)
     app.use(function (req, res, next) {
@@ -14,6 +15,7 @@ var init = function (opts, cb) {
         res.header("Access-Control-Allow-Headers", "X-Requested-From")
         next()
     })
+    app.use(express.static(path.join(__dirname, 'public')))
     var storage = multer.diskStorage({
         destination: function (req, file, cb) {
             var filePath = atob(file.originalname).split('/')
@@ -40,7 +42,7 @@ var init = function (opts, cb) {
         destination = destination.join('/')
         var rootKey = EmblemHD.generateRootKey()
         var storeDatsPromise = EmblemHD.storeShadowedAsync(rootKey, { src: destination, deleteAfterImport: true })
-        storeDatsPromise.then((datCollections) => {
+        /* storeDatsPromise.then((datCollections) => {
             datCollections.shadowCollection.then(shadowDats => {
                 var shadow = shadowDats[0].dat
                 datCollections.secretCollection.then(secretCollection => {
@@ -57,7 +59,7 @@ var init = function (opts, cb) {
                     })
                 })
             })
-        })
+        }) */
     })
     function initPubNub(opts) {
         pubnubOptions = opts
