@@ -2,3 +2,6 @@ node_modules
 tmp
 archiver
 archivist
+ets
+public/.DS_Store
+.DS_Store

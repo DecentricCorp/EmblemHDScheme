@@ -10,8 +10,9 @@ libServer({
     myChannel: "dat_archival"
 },
     (app) => {
+        console.log("Open your browser to http://127.0.0.1:3000")
         app.listen(3000)
-})
+    })
 
 
 

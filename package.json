@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha test",
-    "serve": "node server.js",
+    "serve": "npm run build; node server.js",
+    "build": "browserify ./public/js/src.js -o ./public/js/bundle.js -dv",
     "archiver": "cd archivist; node index.js",
     "postinstall": "git clone https://github.com/DecentricCorp/archivist.git; cd archivist; npm install",
     "docker": "npm run docker-build; npm run docker-run",
@@ -30,6 +31,8 @@
     "coval.js": "git+https://github.com/DecentricCorp/Coval.js.git",
     "dat-node": "git+https://github.com/DecentricCorp/dat-node.git",
     "fs-extra": "^7.0.1",
+    "html5-uploader": "git+https://github.com/DecentricCorp/html5-uploader.git",
+    "humanize": "0.0.9",
     "hypercored": "git+https://github.com/DecentricCorp/hypercored.git",
     "js-sha256": "^0.9.0",
     "melanke-watchjs": "^1.5.0",

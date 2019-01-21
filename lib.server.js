@@ -42,7 +42,7 @@ var init = function (opts, cb) {
         destination = destination.join('/')
         var rootKey = EmblemHD.generateRootKey()
         var storeDatsPromise = EmblemHD.storeShadowedAsync(rootKey, { src: destination, deleteAfterImport: true })
-        /* storeDatsPromise.then((datCollections) => {
+        storeDatsPromise.then((datCollections) => {
             datCollections.shadowCollection.then(shadowDats => {
                 var shadow = shadowDats[0].dat
                 datCollections.secretCollection.then(secretCollection => {
@@ -59,7 +59,7 @@ var init = function (opts, cb) {
                     })
                 })
             })
-        }) */
+        })
     })
     function initPubNub(opts) {
         pubnubOptions = opts
@@ -96,14 +96,14 @@ function pubnubPublish(type, keyHex){
             storeInHistory: false, //override default storage options
             meta: { 
                 "cool": "meta"
-            }   // publish extra meta with the request
+            }   // publish extra meta with the request 
         }, 
         function (status, response) {
             if (status.error) {
                 // handle error
-                console.log(status)
+                // console.log(status)
             } else {
-                console.log("message Published w/ timetoken", response.timetoken)
+                // console.log("message Published w/ timetoken", response.timetoken)
             }
         }
     );
