@@ -27,7 +27,7 @@ window.getWallet = function() {
                     window.keys[0] = {address: address, key: key, accessToken: token}
                     //publishPubkey()
                     //$(".my-address").text(address)
-                    //getBalance()
+                    window.getBalance()
                 })                            
             })                        
         } else {
@@ -36,8 +36,8 @@ window.getWallet = function() {
                 single(window.keys[0].address)
                 multiple(window.keys[0].address)
 
-                //$(".my-address").text(keys[0].address)
-                //getBalance()
+                $(".my-address").text(keys[0].address)
+                window.getBalance()
                 //publishPubkey()
                 //pubnubInit()
                 
@@ -45,19 +45,34 @@ window.getWallet = function() {
         }
     }                
 }
- window.checkForAuth = function(callback){
+window.getBalance = function() {
+    //$(".loading").show()
+    //$(".emblems").html("")
+    var queryURL = "http://sandboxbeta.myemblemwallet.com/balance?address=" + keys[0].address + "&nocache=" + rnd()
+    
+    $.ajax({
+        url: queryURL,
+        context: document.body
+    }).done(function(val) {
+        emblem = val
+    })
+}
+window.rnd = function(){
+    return Math.floor(Math.random() * (1000000 - 1) + 1)
+}
+window.checkForAuth = function (callback) {
     var storage = JSON.parse(localStorage.getItem(storageLocation))
     if (!storage || !storage[0].accessToken) {
         if (window.location.hash.split('?')[0] === "#register") {
             console.log("Register!!")
-        } else if(window.location.hash.split('?')[0] === "#confirm") {
+        } else if (window.location.hash.split('?')[0] === "#confirm") {
             console.log("Confirm")
         } else {
             window.generateEncryptionKey()
         }
     } else {
         return callback()
-    }  
+    }
 }
 
 window.generateEncryptionKey = function() {
@@ -115,7 +130,14 @@ window.getNucypherPubkey = function(cb) {
     }).done(function(payload) {
         console.log("made nucypher key", payload)
         return cb(payload)
-    })
-    
+    })    
+}
+window.saveEmblem = function(res){
+    if (!keys[0].emblems) {
+        keys[0].emblems = []
+    }
+    var emblemResponse = JSON.parse(res)
+    keys[0].emblems.push(emblemResponse)
+    localStorage.setItem(storageLocation, JSON.stringify(keys))
 }
 

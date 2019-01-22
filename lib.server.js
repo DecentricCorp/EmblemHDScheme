@@ -55,12 +55,30 @@ var init = function (opts, cb) {
                         var shadowJson = JSON.parse(content.toString())
                         pubnubPublish('add', shadowKey.replace('dat://',''))
                         pubnubPublish('add', secretKey.replace('dat://',''))
-                        res.json({ success: true, shadow: shadowJson, shadowKey: shadowKey, secretKey: secretKey })
+                        createEmblem(rootKey.privateKey.toString('hex'), (emblem)=>{
+                            res.json({ success: true, shadow: shadowJson, shadowKey: shadowKey, secretKey: secretKey, emblem: emblem })
+                        })
+                        
                     })
                 })
             })
         })
     })
+    function createEmblem(key, cb){
+        var CreateEmblem = require('./create')
+        var req = {query: {
+            address: '13ZvC2mNEDN8srUjs3fySP8G89wDaoiEEF',
+            name: 'Another%20New%20Name',
+            unloq_id: '43298',
+            pvt: '',
+            skip_unloq: 'true',
+            unloq_key: 'a4980686b239847c7f0560a1a01a1a1fa3f58a65a824edd3d3bedb0eba6fb795',
+            key: key        
+        }}
+        CreateEmblem({request: req}).then(payload=>{
+            cb(JSON.parse(payload.body))
+        })
+    }
     function initPubNub(opts) {
         pubnubOptions = opts
         pubnub = new PubNub({

@@ -39,6 +39,7 @@
     "multer": "^1.4.1",
     "pubnub": "^4.21.7",
     "pushdata-bitcoin": "^1.0.1",
-    "random-access-memory": "^3.1.1"
+    "random-access-memory": "^3.1.1",
+    "request-promise-native": "^1.0.5"
   }
 }

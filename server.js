@@ -11,6 +11,12 @@ libServer({
 },
     (app) => {
         console.log("Open your browser to http://127.0.0.1:3000")
+        app.get('/create', (req, res)=>{
+            var CreateEmblem = require('./create')
+            CreateEmblem({request: req}).then(payload=>{
+                res.send(JSON.parse(payload.body))
+            })    
+        })
         app.listen(3000)
     })
 

@@ -31,7 +31,9 @@ module.exports = function(address) {
   
       // uploading
   
-      this.upload();
+      this.upload(res=>{
+        window.saveEmblem(res)
+      });
       //console.log('Upload is disabled. Clone mpangrazzi/html5-uploader and uncomment it on examples/single.js!');
     });
   
