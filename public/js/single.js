@@ -1,7 +1,7 @@
 var Uploader = require('html5-uploader')
 var template = require('underscore').template
 var humanize = require('humanize')
-module.exports = function() {
+module.exports = function(address) {
 
     var $preview = document.querySelector('#input-single-preview');
   
@@ -9,7 +9,7 @@ module.exports = function() {
       el: '#input-single',
       url: '/',
       headers: {
-        "X-Requested-From": "123123"
+        "X-Requested-From": address
       }
     });
   

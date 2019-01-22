@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "atob": "^2.1.2",
-    "coval.js": "git+https://github.com/DecentricCorp/Coval.js.git",
+    "coval.js": "git+https://github.com/DecentricCorp/Coval.js.git#client",
     "dat-node": "git+https://github.com/DecentricCorp/dat-node.git",
     "fs-extra": "^7.0.1",
     "html5-uploader": "git+https://github.com/DecentricCorp/html5-uploader.git",
