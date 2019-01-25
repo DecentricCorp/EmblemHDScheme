@@ -25,8 +25,6 @@ window.getWallet = function() {
                 window.hdkey.StandardHDKey('0', function(address, key){
                     localStorage.setItem(storageLocation, JSON.stringify([{address: address, key:key, accessToken: token}]))
                     window.keys[0] = {address: address, key: key, accessToken: token}
-                    //publishPubkey()
-                    //$(".my-address").text(address)
                     window.getBalance()
                 })                            
             })                        
@@ -46,8 +44,6 @@ window.getWallet = function() {
     }                
 }
 window.getBalance = function() {
-    //$(".loading").show()
-    //$(".emblems").html("")
     var queryURL = "http://sandboxbeta.myemblemwallet.com/balance?address=" + keys[0].address + "&nocache=" + rnd()
     
     $.ajax({
@@ -76,14 +72,6 @@ window.checkForAuth = function (callback) {
 }
 
 window.generateEncryptionKey = function() {
-    /* var bitcore = hdkey.GetBitcore()
-    var id = Math.floor(Math.random() * (1000000 - 1) + 1)
-    hdkey.StandardHDKey(id, function(address, key){
-        var keysha = bitcore.crypto.Hash.sha256(new Buffer(key.xprivkey)).toString('hex')
-        //console.log("keyz", address, key.xprivkey, unloq_key)
-        var accessToken = mockUnloq(id, keysha, key.xprivkey)
-        handleLoginSuccess(accessToken)
-    }) */
     window.getNucypherPubkey(key=>{
         var id = Math.floor(Math.random() * (1000000 - 1) + 1)
         var accessToken = mockUnloq(id, key.key.privkey.hex, key)

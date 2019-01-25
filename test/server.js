@@ -8,9 +8,10 @@ var mime = require('mime')
 var app
 describe('Emblem Dat server', ()=>{
     before(()=>{
-        app = serverLib((app)=>{
+        app = serverLib({deleteAfterImport: false}, (app)=>{
             return app
         })
+        app.listen(3000)
     })
 
     it('processes single file upload', (done)=>{

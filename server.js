@@ -7,11 +7,12 @@ var os = require('os')
 libServer({
     mySubscribeKey: "sub-c-95c943a2-5962-11e4-9632-02ee2ddab7fe",
     myPublishKey: "pub-c-a281bc74-72b6-4976-88ec-e039492b0dfa",
-    myChannel: "dat_archival"
+    myChannel: "dat_archival",
+    deleteAfterImport: true
 },
-    (app) => {
+    (app, csp) => {
         console.log("Open your browser to http://127.0.0.1:3000")
-        app.get('/create', (req, res)=>{
+        app.get('/create', csp, (req, res)=>{
             var CreateEmblem = require('./create')
             CreateEmblem({request: req}).then(payload=>{
                 res.send(JSON.parse(payload.body))

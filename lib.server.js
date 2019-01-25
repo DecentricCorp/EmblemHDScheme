@@ -1,10 +1,13 @@
 var express = require('express')
 var multer = require('multer')
+var csp = require('./csp')
 const atob = require('atob')
 var fs = require('fs-extra')
+const dbGateway = require('./dbGateway')
 var EmblemHDModule = require('./')
 var EmblemHD = new EmblemHDModule().publicMethods
 var app = express()
+const attachWebsocket = dbGateway(app)
 var PubNub = require('pubnub')
 var pubnub, pubnubOptions
 var path = require('path')
@@ -31,17 +34,20 @@ var init = function (opts, cb) {
             cb(null, fileName)
         }
     })
-
+    
+    app.on('connect', event => {
+        console.log("Event!!!", event)
+    })
     var upload = multer({ storage: storage })
     var uploadedFiles = upload.fields([
         { name: 'file' }
     ])
-    app.post('/', uploadedFiles, function (req, res, next) {
+    app.post('/', csp, uploadedFiles, function (req, res, next) {
         var destination = req.files.file[0].destination.replace('//', '/').split('/')
         destination.pop()
         destination = destination.join('/')
         var rootKey = EmblemHD.generateRootKey()
-        var storeDatsPromise = EmblemHD.storeShadowedAsync(rootKey, { src: destination, deleteAfterImport: true })
+        var storeDatsPromise = EmblemHD.storeShadowedAsync(rootKey, { src: destination, deleteAfterImport: opts.deleteAfterImport })
         storeDatsPromise.then((datCollections) => {
             datCollections.shadowCollection.then(shadowDats => {
                 var shadow = shadowDats[0].dat
@@ -102,7 +108,8 @@ var init = function (opts, cb) {
             channels: [pubnubOptions.myChannel || 'demo'],
         })
     }
-    return cb(app)
+    attachWebsocket(app)
+    return cb(app, csp)
 }
 
 function pubnubPublish(type, keyHex){
