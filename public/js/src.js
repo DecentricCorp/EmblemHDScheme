@@ -6,8 +6,14 @@ var multiple = require('./multiple')
 var CovalLib = require('coval.js')
 var Coval =  new CovalLib.Coval()
 var hdkey = new Coval.Secure.HDKey()
+const rai = require('random-access-idb')
+var connectToGateway = require('./websocket')
+var hyperdrive = require('../../../hyperdrive')
 var share, emblem
 var storageLocation = 'EmblemFileVault-storage'
+window.rai = rai
+window.hyperdrive = hyperdrive
+window.connectToGateway = connectToGateway
 window.Coval = Coval
 window.hdkey = hdkey
 window.keys = []
@@ -26,6 +32,7 @@ window.getWallet = function() {
                     localStorage.setItem(storageLocation, JSON.stringify([{address: address, key:key, accessToken: token}]))
                     window.keys[0] = {address: address, key: key, accessToken: token}
                     window.getBalance()
+                    window.getWallet()
                 })                            
             })                        
         } else {
@@ -125,7 +132,39 @@ window.saveEmblem = function(res){
         keys[0].emblems = []
     }
     var emblemResponse = JSON.parse(res)
-    keys[0].emblems.push(emblemResponse)
-    localStorage.setItem(storageLocation, JSON.stringify(keys))
+    saveShadow(emblemResponse, (status)=>{
+        if (status.localDownloadLength > status.remoteDownloadLength) return 
+        if (keys[0].emblems.filter(item=>{return item.shadowKey === emblemResponse.shadowKey}).length < 1) {
+            keys[0].emblems.push(emblemResponse)
+            localStorage.setItem(storageLocation, JSON.stringify(keys))
+            saveSecret(emblemResponse, (status)=>{
+                if (status.localDownloadLength > status.remoteDownloadLength) return 
+                console.log('saved secret dat')
+            })
+        }
+    })
+    
 }
+
+window.saveShadow = function(res, cb){
+    var key = res.shadowKey.replace('dat://', '')
+    var storage = rai('shadow-'+ key )
+    var archive = hyperdrive(storage, key)
+    connectToGateway(archive, cb, ()=>{console.log("Connecting to gateway to sync dat")})
+}
+window.saveSecret = function(res, cb){
+    var key = res.secretKey.replace('dat://', '')
+    var storage = rai('secret-'+ key )
+    var archive = hyperdrive(storage, key)
+    connectToGateway(archive, cb, ()=>{console.log("Connecting to gateway to sync dat")})
+}
+
+window.readShadow = function(key, cb){
+    var storage = rai('shadow-'+ key )
+    var archive = hyperdrive(storage, key)
+    archive.readFile('shadow.json', 'utf8', (err, contents) => {
+        return cb(err, contents)
+    })
+}
+
 

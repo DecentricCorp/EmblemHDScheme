@@ -20,6 +20,7 @@ var datMethods = {
         {
             storage = ram
         } else {
+            fs.ensureDir(src)
             storage = src
         }
         new Dat(storage, { secretKey: key, createWithKey: true }, function (err, dat) {

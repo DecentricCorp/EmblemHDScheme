@@ -8,7 +8,8 @@
     "serve": "npm run build; node server.js",
     "build": "browserify ./public/js/src.js -o ./public/js/bundle.js -dv",
     "archiver": "cd archivist; node index.js",
-    "postinstall": "git clone https://github.com/DecentricCorp/archivist.git; cd archivist; npm install",
+    "postinstall": "npm install https://github.com/DecentricCorp/hyperdb.git",
+    "postinstall-old": "git clone https://github.com/DecentricCorp/archivist.git; cd archivist; npm install",
     "docker": "npm run docker-build; npm run docker-run",
     "docker-build": "docker build . -t emblemhd --no-cache",
     "docker-run": "docker run -p 3000:3000 -t emblemhd"
@@ -30,12 +31,15 @@
     "atob": "^2.1.2",
     "coval.js": "git+https://github.com/DecentricCorp/Coval.js.git#client",
     "dat-node": "git+https://github.com/DecentricCorp/dat-node.git#hyperdb",
+    "deep-equal": "^1.0.1",
     "express-ws": "^4.0.0",
     "fs-extra": "^7.0.1",
     "helmet-csp": "^2.7.1",
     "html5-uploader": "git+https://github.com/DecentricCorp/html5-uploader.git",
     "humanize": "0.0.9",
+    "hypercore": "git+https://github.com/DecentricCorp/hypercore.git",
     "hypercored": "git+https://github.com/DecentricCorp/hypercored.git",
+    "hyperdb": "git+https://github.com/DecentricCorp/hyperdb.git",
     "hyperdiscovery": "^8.0.0",
     "hyperdrive": "git+https://github.com/DecentricCorp/hyperdrive.git#hyperdb-backend",
     "js-sha256": "^0.9.0",
@@ -43,7 +47,9 @@
     "multer": "^1.4.1",
     "pubnub": "^4.21.7",
     "pushdata-bitcoin": "^1.0.1",
+    "random-access-idb": "^1.2.1",
     "random-access-memory": "^3.1.1",
-    "request-promise-native": "^1.0.5"
+    "request-promise-native": "^1.0.5",
+    "websocket-stream": "^5.1.2"
   }
 }
