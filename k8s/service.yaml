@@ -16,6 +16,11 @@ items:
       port: 80
       protocol: TCP
       targetPort: 3000
+    - name: "ws"
+      nodePort: 31131
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
     selector:
       io.kompose.service: emblemhd
     sessionAffinity: None

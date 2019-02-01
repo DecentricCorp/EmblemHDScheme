@@ -6,6 +6,8 @@
   "scripts": {
     "test": "mocha test",
     "serve": "npm run build; node server.js",
+    "watch": "npm run watchify& nodemon ./server.js",
+    "watchify": "watchify ./public/js/src.js -o ./public/js/bundle.js -dv",
     "build": "browserify ./public/js/src.js -o ./public/js/bundle.js -dv",
     "archiver": "cd archivist; node index.js",
     "postinstall": "npm install https://github.com/DecentricCorp/hyperdb.git",
@@ -25,6 +27,7 @@
     "express-fileupload": "^1.1.1-alpha.1",
     "mime": "^2.4.0",
     "mocha": "^5.2.0",
+    "reload": "^2.4.0",
     "rewire": "^4.0.1"
   },
   "dependencies": {

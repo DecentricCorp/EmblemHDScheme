@@ -253,5 +253,21 @@ function encrypt (text, key) {
       throw err
     }
   }
+
+  function decrypt (text, key) {
+    try {
+      let textParts = text.split(':')
+      let iv = Buffer.from(textParts.shift(), 'hex')
+      let encryptedText = Buffer.from(textParts.join(':'), 'hex')
+      let decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
+      let decrypted = decipher.update(encryptedText)
+  
+      decrypted = Buffer.concat([decrypted, decipher.final()])
+  
+      return decrypted.toString()
+    } catch (err) {
+      throw err
+    }
+  }
   
 

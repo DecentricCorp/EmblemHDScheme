@@ -1,4 +1,5 @@
 var libServer = require('./lib.server')
+var reload = require('reload')
 var fs = require('fs-extra')
 var path = require('path')
 var express = require('express')
@@ -11,6 +12,7 @@ libServer({
     deleteAfterImport: true
 },
     (app, csp) => {
+        reload(app)
         console.log("Open your browser to http://127.0.0.1:3000")
         app.get('/create', csp, (req, res)=>{
             var CreateEmblem = require('./create')

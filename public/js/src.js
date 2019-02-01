@@ -6,11 +6,17 @@ var multiple = require('./multiple')
 var CovalLib = require('coval.js')
 var Coval =  new CovalLib.Coval()
 var hdkey = new Coval.Secure.HDKey()
+var user = new Coval.User.Server()
 const rai = require('random-access-idb')
 var connectToGateway = require('./websocket')
-var hyperdrive = require('../../../hyperdrive')
+var hyperdrive = require('hyperdrive')
+const encryption = require('crypto')
 var share, emblem
 var storageLocation = 'EmblemFileVault-storage'
+var sha256 = require('js-sha256').sha256
+window.encryption = encryption
+window.User = user
+window.sha256 = sha256
 window.rai = rai
 window.hyperdrive = hyperdrive
 window.connectToGateway = connectToGateway
@@ -38,8 +44,11 @@ window.getWallet = function() {
         } else {
             window.checkForAuth(function(){
                 window.keys = JSON.parse(localStorage.getItem(storageLocation))
-                single(window.keys[0].address)
-                multiple(window.keys[0].address)
+                var address = keys[0].address
+                var id = keys[0].accessToken.unloq_id
+                var key = keys[0].accessToken.unloq_key
+                single(address, id, key)
+                multiple(address, id, key)
 
                 $(".my-address").text(keys[0].address)
                 window.getBalance()
@@ -142,21 +151,20 @@ window.saveEmblem = function(res){
                 console.log('saved secret dat')
             })
         }
-    })
-    
+    })    
 }
 
 window.saveShadow = function(res, cb){
     var key = res.shadowKey.replace('dat://', '')
     var storage = rai('shadow-'+ key )
     var archive = hyperdrive(storage, key)
-    connectToGateway(archive, cb, ()=>{console.log("Connecting to gateway to sync dat")})
+    connectToGateway(archive, onlyAllowOneCall(cb), ()=>{console.log("Connecting to gateway to sync dat")})
 }
 window.saveSecret = function(res, cb){
     var key = res.secretKey.replace('dat://', '')
     var storage = rai('secret-'+ key )
     var archive = hyperdrive(storage, key)
-    connectToGateway(archive, cb, ()=>{console.log("Connecting to gateway to sync dat")})
+    connectToGateway(archive, onlyAllowOneCall(cb), ()=>{console.log("Connecting to gateway to sync dat")})
 }
 
 window.readShadow = function(key, cb){
@@ -166,5 +174,78 @@ window.readShadow = function(key, cb){
         return cb(err, contents)
     })
 }
+
+window.readSecret = function(key, fileName, cb){
+    var storage = rai('secret-'+ key )
+    var archive = hyperdrive(storage, key)
+    archive.readFile(fileName, (err, contents) => {
+        return cb(err, contents.toString())
+    })
+}
+
+window.decryptDat = function(emblemName){
+    var emblem = findEmblemByName(emblemName)
+    var decryptionKey = new Buffer(User.Combine(emblem.emblem.shares.value).GetValue(), "hex")
+    
+    readShadow(emblem.shadowKey.replace('dat://', ''), (err, val)=>{
+        var stats = JSON.parse(val)
+        function readFile(key, index, cb){
+            var file = stats.files[index]
+            readSecret(key, file.hash+".enc", (err, decoded)=>{
+                var decrypted = decrypt(decoded, decryptionKey)
+                console.log("filename", file.name)
+                //console.log('%c       ', 'font-size: 100px; background: url('+window.btoa(decrypted.toString('hex'))+') no-repeat;')
+                if (stats.files.length === index + 1) {
+                    return cb()
+                } else {
+                    return readFile(key, index + 1, cb)
+                }
+            })
+        }
+        readFile(emblem.secretKey.replace('dat://', ''), 0, ()=>{
+            console.log("Complete")
+        })
+        
+    })
+}
+
+window.findEmblemByName = function(emblemName){
+    return keys[0].emblems.filter(emblem => {
+        return  emblem.emblem.payload.import_response.name === emblemName ||
+                emblem.emblem.payload.provided_name === encodeURI(emblemName) || 
+                emblem.emblem.payload.provided_name === emblemName
+    })[0]
+}
+
+function onlyAllowOneCall(fn){
+    var hasBeenCalled = false;    
+    return function(){
+         if (!hasBeenCalled){
+              //throw Error("Attempted to call callback twice")
+              hasBeenCalled = true
+              return fn.apply(this, arguments)
+         } else {
+
+         }
+         
+         
+    }
+}
+
+function decrypt (text, key) {
+    try {
+      let textParts = text.split(':')
+      let iv = Buffer.from(textParts.shift(), 'hex')
+      let encryptedText = Buffer.from(textParts.join(':'), 'hex')
+      let decipher = encryption.createDecipheriv('aes-256-cbc', key, iv)
+      let decrypted = decipher.update(encryptedText)
+  
+      decrypted = Buffer.concat([decrypted, decipher.final()])
+  
+      return decrypted.toString()
+    } catch (err) {
+      throw err
+    }
+  }
 
 
