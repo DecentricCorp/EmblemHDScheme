@@ -8,14 +8,14 @@ module.exports = connectToGateway
 let replicationCount = 0
 let connecting = 0
 
-function connectToGateway (archive, updateSyncStatus, updateConnecting) {
+function connectToGateway (archive, updateSyncStatus, updateConnecting, cb) {
   const key = archive.key.toString('hex')
   const host = document.location.host.split(':')[0]
   const port = "3000"
   const proto = document.location.protocol === 'https:' ? 'wss' : 'ws'
   const url = `${proto}://${host}:${port}/archive/${key}`
   console.log('connectToGateway', key)
-
+  
   let cancelled = false
   let connected = false
 

@@ -177,7 +177,7 @@ async function encryptAddresses(encryptionKey, addressesToEncrypt) {
 function createEncryptPOST(share, key) {
     return {
         method: 'POST',
-        url: 'http://35.194.8.86/encrypt',
+        url: 'http://130.211.216.162/encrypt',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         form: {
             to_encrypt: share,
@@ -191,7 +191,7 @@ function createAddressPublishPOST(data, type, name) {
     data = Buffer.from(data).toString('hex');
     return {
         method: 'GET',
-        uri: 'http://35.225.9.182/publish?type='+type+'&name='+name+'&data='+data,
+        uri: 'http://34.67.105.21/publish?type='+type+'&name='+name+'&data='+data,
         json: false // Automatically stringifies the body to JSON
     }
 }

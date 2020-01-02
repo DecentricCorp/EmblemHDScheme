@@ -52,6 +52,7 @@ window.getWallet = function() {
 
                 $(".my-address").text(keys[0].address)
                 window.getBalance()
+                window.subscribeToDats()
                 //publishPubkey()
                 //pubnubInit()
                 
@@ -60,13 +61,17 @@ window.getWallet = function() {
     }                
 }
 window.getBalance = function() {
-    var queryURL = "http://sandboxbeta.myemblemwallet.com/balance?address=" + keys[0].address + "&nocache=" + rnd()
+    var queryURL = "https://api.emblemvault.io/balance?service=sandbox-beta&persist=false&address=" + keys[0].address + "&nocache=" + rnd()
     
     $.ajax({
         url: queryURL,
         context: document.body
     }).done(function(val) {
-        emblem = val
+        $(".balances").html("")
+        val.forEach(emblem=>{
+            var shadowKey = keys[0].emblems.filter(local=>{return local.emblem.payload.import_response.name === emblem.name})[0].shadowKey
+            $(".balances").append("<p onclick=\"javascript:localDetails('"+emblem.name+"')\">"+emblem.name+" ("+shadowKey+")</p><div style=\"display:none;\" class=\""+emblem.name+"-details\"></div>")
+        })
     })
 }
 window.rnd = function(){
@@ -85,6 +90,19 @@ window.checkForAuth = function (callback) {
     } else {
         return callback()
     }
+}
+
+window.subscribeToDats = function() {
+    keys[0].emblems.forEach(emblem=>{
+        var shadowKey = emblem.shadowKey.replace('dat://', '')
+        var secretKey = emblem.secretKey.replace('dat://', '')
+        var shadowStorage = rai('shadow-'+ shadowKey )
+        var secretStorage = rai('secret-'+ secretKey )
+        var shadowArchive = hyperdrive(shadowStorage, shadowKey)
+        var secretArchive = hyperdrive(secretStorage, secretKey)
+        connectToGateway(shadowArchive, onlyAllowOneCall(()=>{}), ()=>{console.log("Connecting to gateway to sync dat")})
+        connectToGateway(secretArchive, onlyAllowOneCall(()=>{}), ()=>{console.log("Connecting to gateway to sync dat")})
+    })
 }
 
 window.generateEncryptionKey = function() {
@@ -127,7 +145,7 @@ $( document ).ready(function() {
     window.getWallet()
 })
 window.getNucypherPubkey = function(cb) {
-    var queryURL = "http://35.194.8.86/nucypher-key"
+    var queryURL = "https://api.emblemvault.io/nucypher-key?service=mocknet&persist=false"
     $.ajax({
         url: queryURL,
         context: document.body
@@ -146,6 +164,7 @@ window.saveEmblem = function(res){
         if (keys[0].emblems.filter(item=>{return item.shadowKey === emblemResponse.shadowKey}).length < 1) {
             keys[0].emblems.push(emblemResponse)
             localStorage.setItem(storageLocation, JSON.stringify(keys))
+            getBalance()
             saveSecret(emblemResponse, (status)=>{
                 if (status.localDownloadLength > status.remoteDownloadLength) return 
                 console.log('saved secret dat')
@@ -183,6 +202,62 @@ window.readSecret = function(key, fileName, cb){
     })
 }
 
+window.localDetails = function(name){
+    var emblemName = name
+    var element = $("."+emblemName+"-details")
+    var emblem = findEmblemByName(name)
+    var key = emblem.shadowKey.replace('dat://','')
+    var storage = rai('shadow-'+ key )
+    details(element, key, storage)
+}
+window.details = function(element, key, storage){
+    element.toggle() 
+    element.html("")
+    //var storage = rai('read-'+ key )
+    var archive = hyperdrive(storage, key)
+    var files = []
+    archive.readdir('/', (err, contents)=>{
+        console.log(err, contents)
+        if (contents.includes('shadow.json')) {
+            archive.readFile('/shadow.json', (err,contents)=>{
+                files = JSON.parse(contents.toString()).files
+                listFiles(files)
+            })
+        } else {
+            files = contents
+            var files = files.map(file=> { return { name: file}} )
+            listFiles(files)
+        }
+        function listFiles(files){
+            var fileNames = []
+            files.map(file=>{ fileNames.push(file.name)})
+            fileNames.forEach(file=>{
+                element.append("<br>" + file )
+            })
+        }
+        
+    })
+    
+}
+
+window.remoteDetails = function(){    
+    var element = $(".remoteDetails")
+    var key = $(".remoteDatAddress").val().replace('dat://', '')
+    //var storage = rai('shadow-'+ key )
+    var storage = rai("read-" + key)
+    var archive = hyperdrive(storage, key)
+    connectToGateway(archive, onlyAllowOneCall(()=>{}), ()=>{console.log("Connecting to gateway to sync dat")})
+    setTimeout(()=>{details(element, key, storage)}, 3000)
+}
+
+window.toggleUploads = function(){
+    $(".uploadArea").toggle()
+}
+
+window.toggleReadDat = function(){
+    $(".datReadArea").toggle()
+}
+
 window.decryptDat = function(emblemName){
     var emblem = findEmblemByName(emblemName)
     var decryptionKey = new Buffer(User.Combine(emblem.emblem.shares.value).GetValue(), "hex")
@@ -194,6 +269,7 @@ window.decryptDat = function(emblemName){
             readSecret(key, file.hash+".enc", (err, decoded)=>{
                 var decrypted = decrypt(decoded, decryptionKey)
                 console.log("filename", file.name)
+                console.log('Contents', decrypted)
                 //console.log('%c       ', 'font-size: 100px; background: url('+window.btoa(decrypted.toString('hex'))+') no-repeat;')
                 if (stats.files.length === index + 1) {
                     return cb()

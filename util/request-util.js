@@ -15,31 +15,31 @@ async function fromURL(url) {
 }
 
 async function addressBalances(address) {
-    return await fromURL('http://35.225.9.182/balance?address=' + address)
+    return await fromURL('http://34.67.105.21/balance?address=' + address)
 }
 
 async function nucypherKey(key) {
-    return await fromURL('http://35.194.8.86/nucypher-key?key=' + key)
+    return await fromURL('http://130.211.216.162/nucypher-key?key=' + key)
 }
 
 async function streamRetrieve(streamKey) {
-    return await fromURL('http://35.225.9.182/retrieve?stream_key=' + streamKey + ':piece')
+    return await fromURL('http://34.67.105.21/retrieve?stream_key=' + streamKey + ':piece')
 }
 
 async function ethAddress(key) {
-    return await fromURL('http://35.225.9.182/eth-address?key=' + key)
+    return await fromURL('http://34.67.105.21/eth-address?key=' + key)
 }
 
 async function encrypt(key) {
-    return await fromURL('http://35.225.9.182/encrypt?key=' + key)
+    return await fromURL('http://34.67.105.21/encrypt?key=' + key)
 }
 
 async function addressImport(address) {
-    return await fromURL('http://35.225.9.182/import?address=' + address)
+    return await fromURL('http://34.67.105.21/import?address=' + address)
 }
 
 async function userEncrypt(key, value) {
-    return await fromURL('http://35.225.9.182/encrypt?key=' + key + '&to_encrypt=' + value)
+    return await fromURL('http://34.67.105.21/encrypt?key=' + key + '&to_encrypt=' + value)
 }
 
 module.exports.fromURL = fromURL

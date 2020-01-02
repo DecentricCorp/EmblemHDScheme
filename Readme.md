@@ -1,5 +1,32 @@
 <img src="./media/Emblem.DAT.Shard.Network.png"/>
 
+
+```
+function onlyAllowOneCall(fn){
+    var hasBeenCalled = false;    
+    return function(){
+         if (!hasBeenCalled){
+              //throw Error("Attempted to call callback twice")
+              hasBeenCalled = true
+              return fn.apply(this, arguments)
+         } else {
+
+         }
+         
+         
+    }
+} 
+var key = 'e7a4ddd16e6bdaca756a9d2877173af6d5cfb5aed8202360c4efc955903e1b52'
+var storage = rai('shadow-'+ key )
+var archive = hyperdrive(storage, key)
+connectToGateway(archive, onlyAllowOneCall((a,b)=>{console.log(a,b)}), ()=>{console.log("Connecting to gateway to sync dat")})
+archive.readFile('/shadow.json', (a,b)=>{console.log(a,b.toString())})
+```
+
+
+
+
+
 ```
 HD Scheme Suite
     Derive

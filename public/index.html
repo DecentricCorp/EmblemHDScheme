@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>HTML5 uploader examples</title>
+    <title>Emblem File Vault</title>
 
     <link href="http://fonts.googleapis.com/css?family=Lato:100,300,400" rel="stylesheet" type="text/css">
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
@@ -16,19 +16,23 @@
 
     <div id="app">
 
-      <h1 class="heading">Emblem Vault File Uploader<div class="my-address"></div></h1>
+      <h1 class="heading">Emblem Vault File Uploader</h1>
+      <h3 class="my-address"></h3>
+      <div class="balances">
+        
+      </div>
 
 
       <div class="row">
 
-        <div class="col-md-6">
+
+        <h3 onclick="toggleUploads()">Upload</h3>
+        <div style="display:none;" class="uploadArea col-md-6">
           
 
           <!-- Single file -->
 
           <h3>Single file</h3>
-
-          <p class="desc">Use the input field to add a file</p>
 
           <input type="file" id="input-single" autocomplete="off">
 
@@ -40,19 +44,24 @@
 
           <h3>Multiple files</h3>
 
-          <p class="desc">Use the input field to add one or more files</p>
-
           <input type="file" id="input-multiple" autocomplete="off" webkitdirectory mozdirectory multiple>
-          <input type="hidden" value="123token">
           <div class="preview" id="input-multiple-preview">
             <p class="lead">Preview</p>
           </div>
 
         </div>
-
+        <h3 onclick="toggleReadDat()">Read DAT</h3>
+        <div style="display:none;" class="datReadArea col-md-6">
+          <div class="input-group mb-3" style="width:100%">
+            <input onchange="remoteDetails()" type="text" class="remoteDatAddress form-control" placeholder="DAT to read" aria-label="DAT to read" aria-describedby="basic-addon2">
+          </div>
+          <div style="display:none" class="remoteDetails">
+          </div>
+        </div>
       </div>
     </div>
-    <script src="/reload/reload.js"></script>
+    <!-- <script src="/reload/reload.js"></script> -->
     <script type="text/javascript" src="js/bundle.js"></script>
+    <!-- <script src="http://35.193.123.207:1337/vorlon.js"></script> -->
   </body>
 </html>
